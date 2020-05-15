@@ -3,6 +3,7 @@ import * as fs from 'fs-extra'
 
 import * as _ from 'lodash'
 import * as globby from 'globby'
+import { TSPath } from 'tspath/src/tspath'
 
 import { ServerlessOptions, ServerlessInstance, ServerlessFunction } from './types'
 import * as typescript from './typescript'
@@ -130,6 +131,7 @@ export class TypeScriptPlugin {
     tsconfig.outDir = buildFolder
 
     const emitedFiles = await typescript.run(this.rootFileNames, tsconfig)
+    await this.rewritePaths()
     await this.copyExtras()
     this.serverless.cli.log('Typescript compiled.')
     return emitedFiles
@@ -166,6 +168,11 @@ export class TypeScriptPlugin {
         }
       }
     }
+  }
+
+  async rewritePaths() {
+    this.serverless.cli.log("Rewriting ts config paths...");
+    new TSPath();
   }
 
   async moveArtifacts(): Promise<void> {
